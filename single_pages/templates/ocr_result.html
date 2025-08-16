@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ocr_result</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+     <div class="container my-5">
+        <h1>OCR Result</h1>
+        {% if ocr_text %}
+            <p><strong>Extracted Text:</strong></p>
+            <p>{{ ocr_text }}</p>
+        {% else %}
+            <p>No text was extracted from the image.</p>
+        {% endif %}
+        <a href="{% url 'ocr' %}" class="btn btn-primary">Try Another Image</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Go Home</a>
+    </div>
+
+</body>
+</html>

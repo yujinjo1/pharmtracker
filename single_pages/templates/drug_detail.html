@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팜트래커 - 의약품 상세 정보</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 스타일 생략 */
+        .drug-info img {
+            max-width: 150px;  /* 이미지 최대 너비 설정 */
+            height: auto;  /* 비율에 맞게 높이 자동 설정 */
+            display: block;  /* 블록 요소로 설정하여 아래 여백 조정 */
+            margin: 10px auto;  /* 위 아래 여백 설정 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 네비게이션 생략 -->
+    <div class="container content">
+        <h1 class="page-title">
+            <i class="fas fa-pills icon"></i>
+            <span>의약품 상세 정보</span>
+        </h1>
+        {% if drug_detail %}
+            <div class="drug-info">
+                <h2><i class="fas fa-capsules icon"></i>{{ drug_detail.item_name }}</h2>
+                {% if drug_detail.image_url %}
+                    <img src="{{ drug_detail.image_url }}" alt="{{ drug_detail.item_name }} 이미지" class="img-fluid">
+                {% endif %}
+                <p><strong>제조사:</strong> {{ drug_detail.entp_name }}</p>
+                <p><strong>효능효과:</strong> {{ drug_detail.efficacy }}</p>
+                <p><strong>용법용량:</strong> {{ drug_detail.usage_dosage }}</p>
+                <p><strong>사용상의 주의사항:</strong> {{ drug_detail.precautions }}</p>
+            </div>
+        {% else %}
+            <p class="error-message">의약품 상세 정보를 불러올 수 없습니다.</p>
+        {% endif %}
+    </div>
+    <!-- 스크립트 생략 -->
+</body>
+</html>

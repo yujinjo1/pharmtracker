@@ -1,0 +1,10 @@
+# OpenAI 키 패턴 전부 치환
+regex:sk-[A-Za-z0-9_-]{20,}
+
+# Django SECRET_KEY(개발용)도 치환
+regex:django-insecure-[^'"\s]+
+
+# 과거에 하드코딩했던 다른 키들(리터럴 값)도 안전하게 치환
+literal: THVmbkVCTU1vamNHVWNzR0N3QkZOa3FrY3Z1T2JZZE4=
+literal: VFp4emJvZ2dlZENQRm9Pa3RmVlVhWENFRXhncGZIYWo=
+literal: We3PXjbxHr7km3vJpCmXWEaiMARYPCK3a8oIMd4q8BPqP0Dbw04BXt9P6LBlINf9152m5h0WeCQwZUZ0KayQGg%3D%3D

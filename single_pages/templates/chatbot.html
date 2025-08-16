@@ -1,0 +1,364 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팜트래커 - 챗봇</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #50C3E7;
+            --secondary-color: #3aa0c9;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --bot-bg-color: #e9f6fb;
+            --user-bg-color: #50C3E7;
+            --input-bg-color: #f8f9fa;
+            --button-hover-bg-color: #3aa0c9;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            z-index: 1000;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .content {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 56px); /* Adjusted to account for the navbar height */
+            margin-top: 56px; /* Ensures content is pushed below the navbar */
+        }
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            margin: 10px;
+            overflow: hidden;
+        }
+        .chat-header {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--input-bg-color);
+        }
+        .chat-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .chat-header h2 {
+            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--input-bg-color);
+        }
+        .message {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-end;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message.bot {
+            justify-content: flex-start;
+        }
+        .message p {
+            display: inline-block;
+            padding: 15px;
+            border-radius: 20px;
+            margin: 0;
+            position: relative;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .message.user p {
+            background-color: var(--user-bg-color);
+            color: #fff;
+            border-top-right-radius: 0;
+        }
+        .message.bot p {
+            background-color: var(--bot-bg-color);
+            color: var(--text-color);
+            border-top-left-radius: 0;
+        }
+        .message.bot .icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        .form-group {
+            background-color: var(--input-bg-color);
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        .form-group input {
+            border: none;
+            background: transparent;
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .form-group input:focus {
+            outline: none;
+        }
+        .form-group .input-group-append {
+            display: flex;
+            align-items: center;
+        }
+        .form-group button,
+        .form-group .mic-button {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 24px;
+            transition: background-color 0.3s ease;
+        }
+        .form-group button:hover,
+        .form-group .mic-button:hover {
+            background-color: var(--button-hover-bg-color);
+            color: white;
+        }
+        .loading {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        }
+        .loading p {
+        margin: 0;
+        padding: 15px;
+        border-radius: 20px;
+        background-color: var(--bot-bg-color);
+        color: var(--text-color);
+        border-top-left-radius: 0;
+        display: flex;
+        align-items: center;
+        }
+        .loading span {
+        display: inline-block;
+        width: 6px;  /* Slightly smaller than before */
+        height: 6px;  /* Slightly smaller than before */
+        margin: 0 2px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        animation: loading 0.6s infinite alternate;
+        }
+        .loading span:nth-child(2) {
+        animation-delay: 0.2s;
+        }
+        .loading span:nth-child(3) {
+        animation-delay: 0.4s;
+        }
+
+        @keyframes loading {
+        from {
+            transform: scale(1);
+            }
+        to {
+            transform: scale(1.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">팜트래커</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'news' %}">약학뉴스</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'drug_list' %}">의약품 정보</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'chatbot' %}">챗봇</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'drug_interaction' %}">의약품 상호작용</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'pharmacy_list' %}">약국 정보</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                            <a class="nav-link" href="{% url 'mypage' %}">{{ user.username }}님의 마이페이지</a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'login' %}">로그인</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="chat-container">
+            <div class="chat-header">
+                <img src="{% static 'single_pages/images/chatbot.gif' %}" alt="chatbot">
+                <h2>팜트래커 챗봇</h2>
+                <p>약 정보가 궁금할 땐?</p>
+            </div>
+            <div class="chat-box" id="chat-box">
+                <div class="message bot">
+                    <i class="fas fa-robot icon"></i>
+                    <p>안녕하세요, 팜트래커 챗봇입니다. 무엇을 도와드릴까요?</p>
+                </div>
+                {% if conversation %}
+                    {% for message in conversation %}
+                        <div class="message {{ message.sender }}">
+                            {% if message.sender == 'bot' %}
+                                <i class="fas fa-robot icon"></i>
+                            {% endif %}
+                            <p>{{ message.text }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <!-- The loading message will be dynamically added here -->
+            </div>
+            <form method="post" id="chat-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="input-group-append">
+                        <button type="button" class="mic-button" id="mic-button">🎤</button>
+                    </div>
+                    <input type="text" id="user_input" name="user_input" placeholder="메시지를 입력하세요" required>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </form>
+            {% if error_message %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const chatBox = $('#chat-box');
+            const chatForm = $('#chat-form');
+            const userInput = $('#user_input');
+            const micButton = $('#mic-button');
+
+            chatForm.on('submit', function(e) {
+                e.preventDefault();
+                const message = userInput.val().trim();
+                if (message) {
+                    addMessage('user', message);
+                    showLoadingMessage();
+                    sendMessage(message);
+                    userInput.val('');
+                }
+            });
+
+            function addMessage(sender, text) {
+                const messageHtml = `
+                    <div class="message ${sender}">
+                        <p>${text}</p>
+                    </div>
+                `;
+                chatBox.append(messageHtml);
+                chatBox.scrollTop(chatBox[0].scrollHeight);
+            }
+
+            function showLoadingMessage() {
+                const loadingHtml = `
+                    <div class="message bot loading" id="loading-message">
+                        <i class="fas fa-robot icon"></i>
+                        <p>답변을 생성하는 중입니다<span>.</span><span>.</span><span>.</span></p>
+                    </div>
+                `;
+                chatBox.append(loadingHtml);
+                chatBox.scrollTop(chatBox[0].scrollHeight);
+            }
+
+            function hideLoadingMessage() {
+                $('#loading-message').remove();
+            }
+
+            function sendMessage(message) {
+                $.ajax({
+                    url: '/chatbot/',
+                    method: 'POST',
+                    data: JSON.stringify({question: message}),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        hideLoadingMessage();
+                        addMessage('bot', response.answer);
+                    },
+                    error: function() {
+                        hideLoadingMessage();
+                        addMessage('bot', '죄송합니다. 오류가 발생했습니다.');
+                    }
+                });
+            }
+
+            // 음성 인식 기능
+            if ('webkitSpeechRecognition' in window) {
+                let recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.lang = 'ko-KR';
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    userInput.val(transcript);
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('음성 인식 오류:', event.error);
+                };
+
+                micButton.on('click', function() {
+                    if (recognition.isReturning) {
+                        recognition.stop();
+                        micButton.text('🎤');
+                    } else {
+                        recognition.start();
+                        micButton.text('🔴');
+                    }
+                });
+
+                recognition.onend = function() {
+                    micButton.text('🎤');
+                    recognition.isReturning = false;
+                };
+            } else {
+                micButton.hide();
+                console.log('Web Speech API가 이 브라우저에서 지원되지 않습니다.');
+            }
+        });
+    </script>
+</body>
+</html>
